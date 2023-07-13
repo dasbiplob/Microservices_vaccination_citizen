@@ -4,6 +4,7 @@ import com.example.VaccinationCenter.Entity.VaccinationCenter;
 import com.example.VaccinationCenter.Model.Citizen;
 import com.example.VaccinationCenter.Model.RequiredResponse;
 import com.example.VaccinationCenter.Repositories.CenterRepo;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ public class VaccinationCenterController {
     }
 
     @GetMapping(path = "/id/{id}")
+    @HystrixCommand(fallbackMethod = "handleCitizenDowntime")
     public ResponseEntity<RequiredResponse> getAllDataByCenterId(@PathVariable Integer id){
 
             RequiredResponse requiredResponse = new RequiredResponse();
@@ -46,5 +48,16 @@ public class VaccinationCenterController {
             List<Citizen> citizenList = restTemplate.getForObject("http://CITIZEN-SERVICE/citizen/id/"+id, List.class);
             requiredResponse.setCitizenList(citizenList);
             return new ResponseEntity<RequiredResponse>(requiredResponse,HttpStatus.OK);
+    }
+
+    //Circuit Breaker Implemented
+    public ResponseEntity<RequiredResponse> handleCitizenDowntime(@PathVariable Integer id) {
+
+        RequiredResponse requiredResponse = new RequiredResponse();
+        //1st get vaccination center Details
+        VaccinationCenter vaccinationCenter = centerRepo.findById(id).get();
+        requiredResponse.setVaccinationCenter(vaccinationCenter);
+
+        return new ResponseEntity<RequiredResponse>(requiredResponse, HttpStatus.OK);
     }
 }
