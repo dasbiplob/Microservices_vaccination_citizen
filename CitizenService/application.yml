@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+  spring:
+    datasource:
+      url: jdbc:h2:mem:CitizenDB
+      username: sa
+      password:
+      driverClassName: org.h2.Driver
+      h2:
+        console:
+          enable: true
+          path: /h2-ui
+          settings.trace: false
+          settings.web-allow-others: false
+    jpa:
+      spring:
+        jpa:
+          show-sql : ture
+      spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
+      spring.jpa.hibernate.ddl-auto : update
