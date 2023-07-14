@@ -4,7 +4,8 @@ import com.example.VaccinationCenter.Entity.VaccinationCenter;
 import com.example.VaccinationCenter.Model.Citizen;
 import com.example.VaccinationCenter.Model.RequiredResponse;
 import com.example.VaccinationCenter.Repositories.CenterRepo;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class VaccinationCenterController {
 
     @Autowired
     private RestTemplate restTemplate;
+    private static final String ServiceVaccinationCenter = "ServiceVaccinationCenter";
 
     @PostMapping(path = "/add")
     public ResponseEntity<VaccinationCenter> addCitizen(@RequestBody VaccinationCenter vaccinationCenter){
@@ -36,7 +38,7 @@ public class VaccinationCenterController {
     }
 
     @GetMapping(path = "/id/{id}")
-    @HystrixCommand(fallbackMethod = "handleCitizenDowntime")
+    @CircuitBreaker(name = ServiceVaccinationCenter,fallbackMethod = "handleCitizenDowntime")
     public ResponseEntity<RequiredResponse> getAllDataByCenterId(@PathVariable Integer id){
 
             RequiredResponse requiredResponse = new RequiredResponse();
